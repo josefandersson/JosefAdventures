@@ -1,0 +1,147 @@
+body { padding: 0; margin: 0; background-image: url('../images/seamless_maze.png'); color: white; min-width: 320px; }
+
+
+/* Default font-families */
+h1                                      { font-family: 'Courgette', cursive;           }
+h2, h3, h4, h5, h6, span, div, input, p { font-family: 'Roboto Condensed', sans-serif; }
+
+/* Default font-sizes */
+h1 { font-size: 45px; }
+h2 { font-size: 39px; }
+h3 { font-size: 33px; }
+h4 { font-size: 27px; }
+h5 { font-size: 21px; }
+h6 { font-size: 14px; }
+
+/* Default margin for headers */
+h1, h2, h3, h4, h5, h6, p { margin: 5px 10px; }
+
+/* Links in the no-style class will not have any decoration or color */
+a.no-style, a.no-style:visited, a.no-style:hover, a.no-style:active { color: inherit; text-decoration: none; }
+
+/* The main div that holds all other elements */
+/* Will be centered horizontally for bigger widths */
+div.content {
+    min-width: 900px;
+    max-width: 1200px;
+    width: 70%;
+    margin: auto;
+    -webkit-animation: fadein 1.5s; /* Safari, Chrome and Opera > 12.1 */
+    -moz-animation:    fadein 1.5s; /* Firefox < 16 */
+    -ms-animation:     fadein 1.5s; /* Internet Explorer */
+    -o-animation:      fadein 1.5s; /* Opera < 12.1 */
+    animation:         fadein 1.5s;
+}
+
+
+
+/* Error messages are displayed when they are targetet in the url */
+p.error_msg        { display: none; color: red; }
+p.error_msg:target { display: inherit;          }
+
+
+
+
+/* The header contains the title of the site plus the smaller description header */
+/* This will be present on all hub pages */
+header {
+    text-align: center;
+    padding: 10px;
+    margin: 70px auto;
+    color: #fff;
+    text-shadow: -2px 0 1px #000000, 0 2px 1px #000000, 2px 0 1px #000000, 0 -2px 1px #000000;
+}
+
+footer {
+    margin-top: 50px;
+    padding: 10px 0;
+    text-align: center;
+    font-family: monospace;
+    color: #333;
+}
+
+/* The divider works just like a <hr> element, but it's a div */
+div.divider {
+    margin: 10px auto;
+    width: 60%;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #111;
+    height: 2px;
+}
+
+
+/* The unordered list designed used for displaying in a fill on both x and y sort of way */
+ul.display {
+    list-style: none;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+/* The list item styling for display lists */
+ul.display > li { margin: 10px; display: inline-block; }
+
+/* The styling for the container of items in the display list */
+/* A tidy little box */
+div.display {
+    text-align: left;
+    width: 280px;
+    /*border: 2px solid #fff;*/
+    border-radius:15px;
+    -moz-border-radius:15px;
+    -webkit-border-radius:15px;
+    padding: 8px;
+    text-shadow: -1px 0 2px #000000, 0 1px 2px #000000, 1px 0 2px #000000, 0 -1px 2px #000000;
+    -webkit-filter: grayscale(60%);
+    filter: grayscale(60%);
+}
+
+img.social {
+    width: 32px;
+}
+
+/* Hover effect for the container of items in the display list */
+div.display:hover { -webkit-filter: grayscale(0%); filter: grayscale(0%); }
+
+
+
+/* The account image in the lower left corner for managing ones account */
+img.user {
+    position: fixed;
+    left: 5px;
+    bottom: 5px;
+    width: 40px;
+    opacity: 0.6;
+}
+
+/* The hover effect for the link will be a simple fade-out/in */
+img.user:hover { opacity: 1; }
+
+@media (min-width: 501px) and (max-width: 900px) {
+    h1 { font-size: 35px; }
+    h2 { font-size: 30px; }
+    h3 { font-size: 25px; }
+    h4 { font-size: 20px; }
+    h5 { font-size: 15px; }
+    h6 { font-size: 11px; }
+
+    div.content { width: 500px; min-width: 500px; }
+    header      { margin: 60px auto; }
+}
+
+@media (max-width: 500px) {
+    h1 { font-size: 25px; }
+    h2 { font-size: 23px; }
+    h3 { font-size: 20px; }
+    h4 { font-size: 17px; }
+    h5 { font-size: 12px; }
+    h6 { font-size: 9px; }
+
+    div.content { width:  100%; min-width: 320px; }
+    header      { margin: 40px auto 50px auto;    }
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

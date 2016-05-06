@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+    h2 Register!
+    p.error_msg#username_already_in_use The username is already taken.
+    p.error_msg#missing_credentials Missing username or password. Please fill in the whole form.
+    form(method="POST", action="/register")
+        p
+            label(for="username") Username: 
+            input#username(name="username", placeholder="username")
+        p
+            label(for="password") Password: 
+            input#password(name="password", type="password", placeholder="password")
+        p
+            input(type="submit", value="Register")
+    p
+        a(href="/login")
+            span I do already have an account!

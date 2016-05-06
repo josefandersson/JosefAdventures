@@ -1,0 +1,20 @@
+doctype html
+html
+    head
+        if title
+            title= title
+        else 
+            title Home of Josef
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Courgette|Rancho|Roboto+Condensed')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+    body
+        div.content
+            header
+                a(href="/", class="no-style")
+                    h1 Josefadventures.org
+                    h5 The adventurous webzone
+            section
+                block content
+        footer
+            span josefadventures.org &copy; 2016

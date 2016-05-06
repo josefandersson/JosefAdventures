@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    ul.display
+        each project in projects
+            li
+                a(href="#{project.href}", class="no-style")
+                    div.display(style={'background-image': 'url(#{project.image})'})
+                        h3= project.name
+                        p= project.description
+    a.user(href="/me")
+        img.user(src="/images/account.png", title="Manage your account")

@@ -1,0 +1,31 @@
+extends layout
+
+block content
+    h2 Hello, #{user.displayname}!
+    h4 Create new project..
+    form(method="POST", action="/admin", enctype="multipart/form-data")
+        input(type="hidden", name="action", value="create")
+        p
+            label(for="project_name") Project name: 
+            input#project_name(name="name", placeholder="name")
+        p
+            label(for="project_description") Project description: 
+            input#project_description(name="description", placeholder="description")
+        p
+            label(for="project_href") Project link: 
+            input#project_href(name="href", placeholder="link")
+        p
+            label(for="project_image") Project image: 
+            input#project_image(type="file", name="image", accept="image/*")
+        p
+            input(type="submit", value="Create")
+    h4 Remove a project..
+    form(method="POST", action="/admin")
+        input(type="hidden", name="action", value="remove")
+        p
+            label(for="project_list") Choose a project 
+            select#project_list(name="project")
+                each project in projects
+                    option(value="#{project._id}") #{project.name}
+        p
+            input(type="submit", value="Remove")

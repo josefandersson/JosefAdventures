@@ -1,0 +1,38 @@
+body {
+    max-width: 700px;
+    margin:auto;
+    background-image: url('paper_texture.png');
+}
+
+hr { border: 1px solid #605132; }
+
+h1, h2  { color: #8f4646; }
+h3      { color: #123475; }
+h4, h5  { color: #7d6262; }
+span, p { color: #a88a88; }
+label   { color: #365f66; }
+a       { color: #4574c8; }
+
+.tool_output { color: #3c00ff; }
+
+input {
+    margin: 4px 6px 4px 2px;
+    padding: 4px;
+}
+
+::-webkit-input-placeholder { color: #8489A5; }
+::-moz-placeholder          { color: #8489A5; }
+:-ms-input-placeholder      { color: #8489A5; }
+:-moz-placeholder           { color: #8489A5; }
+
+.tool_input {
+    border: 1px solid #6da3c5;
+    background-color: #9db0b1;
+    color: #001074;
+}
+.tool_submit {
+    background-color: #a5988c;
+    border: 1px solid #a5957d;
+    cursor: pointer;
+}
+.tool_submit:hover { background-color: #695d51; }
