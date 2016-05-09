@@ -8,10 +8,17 @@ block content
         p Your permissions (raw): #{user.permissions}
     else
         p You have no elevated permissions
+    if api_key
+        p You have an API key starting with: #{api_key}...
+    else
+        p You have no valid API keys
     if user.hasPermission('administration.panel.view')
         p
             a(href="/admin")
                 span Admin panel
+    p
+        a(href="/api")
+            span Check out the API
     p
         a(href="/logout")
             span Logout

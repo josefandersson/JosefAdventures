@@ -11,6 +11,7 @@ var formidable = require('express-formidable'); // For parsing multipart forms
 
 var fs = require('fs');
 
+var api = require('./routes/api');
 var hub = require('./routes/hub');
 var random = require('./routes/random');
 
@@ -46,6 +47,15 @@ app.use(formidable.parse({
     hash: 'md5',
     multiples: false
 }));
+
+
+/* The api is both private and
+** public. All requests require
+** an api-key that is obtained
+** via filling in the form on
+** '/api'. Generating an api-key
+** requires an account. */
+app.use('/api/', api);
 
 /* The 'b' is our image board
 ** application for hosting random

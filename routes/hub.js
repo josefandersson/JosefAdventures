@@ -116,7 +116,13 @@ router.get('/logout', function(req, res, next) {
 router.get('/me', function(req, res, next) {
     postman.validateSession(req, function( user ) {
         if (user) {
-            res.render('hub/me', { user: user, title: 'Home of Josef - User Info' });
+            postman.getKeyFor(user, function( api_key ) {
+                if (api_key) {
+                    res.render('hub/me', { user: user, api_key: api_key.substring(0, 5) ,title: 'Home of Josef - User Info' });
+                } else {
+                    res.render('hub/me', { user: user, title: 'Home of Josef - User Info'});
+                }
+            });
         } else {
             res.redirect('/login');
         }

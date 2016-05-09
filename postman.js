@@ -87,6 +87,8 @@ random_files:
     upload - upload a file to /b/
     edit - edit a files information on /b/ (tags, description, name)
     remove - remove a file from /b/
+api:
+    generate_key - is the user allowed to generate a key
 */
 
 /* Takes unsaltedPassword and hashes it with the user's
@@ -178,13 +180,35 @@ sessionSchema.pre("save", function(next) {
     next();
 });
 
-/* Mongoose models */
-var Project         = mongoose.model('project', projectSchema);
-var Random          = mongoose.model('random',  randomSchema);
-var Tag             = mongoose.model('tag',     tagSchema);
-var User            = mongoose.model('user',    userSchema);
-var Session         = mongoose.model('user_session', sessionSchema);
+// Schema for storing our API-keys and requests
+// There can only be one API-key per user
+var apiKeySchema = new Schema({
+    user:         { type: Schema.Types.ObjectId, ref: 'user', unique: true, required: true },
+    api_key:      { type: String, unique: true, required: true },
+    requests:     { type: Number, default: 0 },
+    last_request: { type: Date, default: Date.now, index: { expires: 60 * 60 * 24 * 3 }}, // The API key will expire after three days of not being used
+});
 
+/* Call this every time the api-key is used
+** to update the database with statistics.
+** The numbers are important to reconginze
+** abuse. */
+apiKeySchema.virtual('onRequest').get(function() {
+    return function() {
+        this.requests    += 1;
+        this.last_request = new Date();
+        this.save();
+    };
+});
+
+
+/* Mongoose models */
+var Project         = mongoose.model('project',      projectSchema);
+var Random          = mongoose.model('random',       randomSchema);
+var Tag             = mongoose.model('tag',          tagSchema);
+var User            = mongoose.model('user',         userSchema);
+var Session         = mongoose.model('user_session', sessionSchema);
+var ApiKey          = mongoose.model('api_key',      apiKeySchema);
 
 /* Insert project (don't do it here...) */
 // new Project({ name: 'Social', description: 'Here you can find links to my social pages.', href: '/social/', image: '/images/social.png' }).save();
@@ -519,7 +543,7 @@ Postman.isValidPassword = function(password) {
 Postman.saltPassword = function(unsaltedPassword, salt) {
     var sha256_md = forge.md.sha256.create();
     var serverSalt = '8TGhbSv8ACZkAxUXsOdS';    // To confuse potential crackers even more we use this server salt to hash all passwords too (I am aware that this is a bit silly when the source code is public)
-    sha256_md.update(unsaltedPassword + serverSalt);
+    sha256_md.update(salt + unsaltedPassword + serverSalt);
     return sha256_md.digest().toHex();
 };
 
@@ -541,5 +565,69 @@ Postman.isPermissionFormat = function(permission) {
     }
 };
 
+
+/* Generate a new API key for a user. If the
+** user already has one API key it will be
+** overwritten with a new one. Callback is
+** passed the next API key as an argument. */
+Postman.generateKeyFor = function(user, cb) {
+    ApiKey.findOne({ user: user._id }).exec(function(err, doc) {
+        if (!err) {
+            var key = Postman.saltPassword(user.displayName, Postman.generateSalt()); // Why not just be lazy and use the same function we use for hashing passwords
+            console.log('NEW KEY:',key);
+            var saveCallback = function(err) {
+                if (err) {
+                    cb(null);
+                } else {
+                    cb(key);
+                }
+            };
+            if (doc) {
+                doc.api_key = key;
+                doc.requests = 0;
+                doc.last_request = null;
+                doc.save(saveCallback);
+            } else {
+                new ApiKey({ user: user, api_key: key }).save(saveCallback);
+            }
+        } else {
+            cb(null);
+        }
+    });
+};
+
+
+/* Destroy any API keys that is associated
+** with the user. Callback is passed either
+** true or false, true for success, false
+** for error or no key destroyed. */
+Postman.destroyKeyFor = function(user, cb) {
+    ApiKey.remove({ user: user._id }).exec(function(err) {
+        if (!err) {
+            cb(true);
+        } else {
+            cb(false);
+        }
+    });
+};
+
+
+/* Get the API key for a user. Warning, API
+** keys can do much damage if they are in the
+** wrong hands so don't use this method too
+** much. Never print the key to the page. */
+Postman.getKeyFor = function(user, cb) {
+    ApiKey.findOne({ user: user._id }).exec(function(err, doc) {
+        if (!err) {
+            if (doc) {
+                cb(doc.api_key);
+            } else {
+                cb(null);
+            }
+        } else {
+            cb(null);
+        }
+    });
+}
 
 module.exports = Postman;
