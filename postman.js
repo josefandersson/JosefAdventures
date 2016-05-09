@@ -297,30 +297,6 @@ Postman.removeProjectById = function(projectId, cb) {
 };
 
 
-/* Parses a request's form using
-** formidable. */
-Postman.parseForm = function(req, cb) {
-    if (req && cb) {
-        // Create a new formidable incoming form and set it up with default parsing settings
-        var form = new formidable.IncomingForm();
-        form.encoding = 'utf-8';
-        form.uploadDir = "./tmp_upload";
-        form.multiples = false;
-        form.keepExtensions = true;
-        form.on('end', function(e) {
-            console.log('END!!');
-        });
-
-        // Parse the form and run callback
-        form.parse(req, function(err, fields, files) {
-            cb(err, fields, files, form);
-        });
-    } else {
-        return false;
-    }
-};
-
-
 /* Checks if the request's session_id
 ** is currently associated with a user.
 ** If so, pass the User object to the
@@ -364,7 +340,7 @@ Postman.tryLogin = function(cred, req, cb) {
                                 Postman.updateSession(user, req, function(success) {
                                     if (success) {
                                         console.log('Updated the session for user %s.', user.username);
-                                        console.log('The user %s signed in.', user.username)
+                                        console.log('The user %s signed in.', user.username);
                                         cb(user);   // The user successfully signed in with the correct credentials
                                     } else {
                                         console.log('Something went wrong with updating/creating a session...');
@@ -629,5 +605,39 @@ Postman.getKeyFor = function(user, cb) {
         }
     });
 }
+
+
+/* Get a user object from the database by
+** its user_id. The user object is passed
+** to the callback. If user is not found
+** null is passed to the callback. */
+Postman.getUserById = function(user_id, cb) {
+    User.findOne({ _id: user_id }).exec(function(err, doc) {
+        if (!err) {
+            if (doc) {
+                cb(doc);
+            } else {
+                cb(null);
+            }
+        } else {
+            cb(null);
+        }
+    });
+};
+
+
+/* Return a list of all user objects in
+** the database. This is not good to do
+** as if the userbase is big, the list
+** will be huge. */
+Postman.getUsers = function(cb) {
+        User.find({ }).exec(function(err, docs) {
+            if (!err) {
+                cb(docs);
+            } else {
+                cb(null);
+            }
+        });
+};
 
 module.exports = Postman;

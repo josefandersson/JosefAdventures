@@ -23,9 +23,25 @@ block content
     form(method="POST", action="/admin")
         input(type="hidden", name="action", value="remove")
         p
-            label(for="project_list") Choose a project 
+            label(for="project_list") Choose a project: 
             select#project_list(name="project")
                 each project in projects
                     option(value="#{project._id}") #{project.name}
         p
             input(type="submit", value="Remove")
+    h4 Manage users..
+    form(method="POST")
+        input(type="hidden", name="action", value="manage_user")
+        p
+            label(for="user") Choose a user: 
+            select#user(name="user")
+                each user in users
+                    option(value="#{user._id}") #{user.displayname} [#{user.username}]
+        p
+            label(for="displayname") New displayname: 
+            input#displayname(name="displayname", placeholder="displayname")
+        p
+            label(for="permissions") Set permissions: 
+            input#permissions(name="permissions", placeholder="JSON!!")
+        p
+            input(type="submit", value="Update")

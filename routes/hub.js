@@ -140,7 +140,9 @@ router.get('/admin', function(req, res, next) {
         if (user && user.hasPermission('administration.panel.view')) {
             // We want to list all projects so that we can either edit them or remove them
             postman.getProjects(function(projects) {
-                res.render('hub/admin', { user: user, projects: projects, title: 'Home of Josef - Admin Panel' });
+                postman.getUsers(function(users) {
+                    res.render('hub/admin', { user: user, users: users, projects: projects, title: 'Home of Josef - Admin Panel' });
+                });
             });
         } else {
             // Don't send no headers yo!
@@ -195,6 +197,31 @@ router.post('/admin', function(req, res, next) {
                         }
                     } else {
                         res.redirect('/admin#no_permission');
+                    }
+                } else if (action == 'manage_user') {
+                    if (req.body.user) {
+                        postman.getUserById(req.body.user, function( otherUser ) {
+                            if (otherUser) {
+                                if (req.body.permissions) {
+                                    // if (user.hasPermissions('user.others.edit.permissions')) {
+                                        otherUser.permissions = req.body.permissions;
+                                    // }
+                                }
+                                if (req.body.displayname) {
+                                    // if (user.hasPermissions('user.others.edit.displayname')) {
+                                        otherUser.displayname = req.body.displayname;
+                                    // }
+                                }
+                                otherUser.save(function() {
+                                    res.redirect('/admin#user_updated');
+                                });
+                            } else {
+                                res.redirect('/admin#unknown_user_id');
+                            }
+                        });
+                    }
+                    if (user.hasPermission('user.others.edit.displayname')) {
+
                     }
                 } else {
                     if (image) { fs.unlink(image.path); }
