@@ -122,7 +122,7 @@ userSchema.virtual('hasPermission').get(function() {
 
                 // Check if there's any anti_permissions for the permission
                 var section, noAntiPerm = false, part = json.anti_permissions;
-                if (part == '*') return false;
+                if (part == '*' || part === true) return false;
                 for (var i in splitPerms) {
                     if (!part) {
                         noAntiPerm = true;
@@ -141,19 +141,20 @@ userSchema.virtual('hasPermission').get(function() {
                     }
                 }
 
+
                 // If there were no anti_permissions for the permission we will see if there are any permissions for the permission
                 if (noAntiPerm) {
                     part = json.permissions;
-                    if (part == '*') return true;
+                    if (part == '*') { return true; }
                     for (var i in splitPerms) {
                         if (!part) {
                             return false; // User hasn't got the permission
                         } else {
                             section = splitPerms[i];
+                            part = part[section];
                             if (part === true) {
                                 return true; // User has got the permission
                             }
-                            part = part[section];
                         }
                     }
                 }
