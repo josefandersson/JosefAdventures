@@ -1,0 +1,19 @@
+extends ../hub/layout
+
+block content
+    h2 The JosefAdventures API
+    if user
+        if api_key
+            p You have already got an API key. Before generating a new one, please note that already existing keys associated with your account will be destroyed.
+            p
+                a(href="/api/destroy")
+                    button Destroy API key
+        if user.hasPermission('api.generate_key')
+            p To generate a new API key, click the button below.
+            p
+                a(href="/api/generate")
+                    button Generate API key
+        else
+            p Your account does not currently have enough permissions to generate an API key.
+    else
+        p If you have an account with permission 'api.generate_key', sign in to your account to be able to generate a key.

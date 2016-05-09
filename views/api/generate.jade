@@ -1,0 +1,14 @@
+extends ../hub/layout
+
+block content
+    h2 The JosefAdventures API
+    if api_key
+        p
+            label(for="api_key") The following key was successfully generated: 
+            input(value="#{api_key}", id="api_key")
+        p The key will be destoyed after 3 days of inactivity.
+        p If you wish to destroy the key manually, please go to 
+            a(href="/api/destroy") /api/destroy
+            |.
+    else
+        p A key could not be generated, because you do not have enough permissions.
