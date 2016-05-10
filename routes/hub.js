@@ -244,9 +244,5 @@ router.post('/admin', function(req, res, next) {
 });
 
 
-/* Print the IP of the remote client. */
-router.get('/ip', function(req, res, next) {
-    res.send(req.connection.remoteAddress);
-});
 
 module.exports = router;

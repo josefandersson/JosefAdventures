@@ -60,7 +60,7 @@ router.get('/destroy', function(req, res, next) {
 });
 
 
-/* Public APIS */
+/* PUBLIC APIs */
 
 /* Get all projects that is listed on the
 ** homepage. They are returns in a list of
@@ -89,6 +89,62 @@ router.get('/projects/all', function(req, res, next) {
         res.send(JSON.stringify(output));
     });
 });
+
+
+/* Return all different permission nodes that is used
+** by the application. The permissions are sorted in
+** a object tree and returned as JSON. */
+router.get('/users/permissions/all', function(req, res, next) {
+    res.setHeader('content-type', 'text/json');
+    res.send(JSON.stringify({
+        "administration": {
+            "panel": {
+                "view": "View the administration panel.",
+                "edit": "Use the administration panel."
+            },
+            "project": {
+                "create": "Create a project to the homepage.",
+                "edit": "Edit a project on the homepage.",
+                "remove": "Remove a project from the homepage."
+            }
+        },
+        "user": {
+            "self": {
+                "edit": {
+                    "username": "Change their own username.",
+                    "displayname": "Change their own displayname.",
+                    "password": "Change their own password."
+                },
+                "delete": "Delete their own account."
+            },
+            "other": {
+                "edit": {
+                    "username": "Change someone else's username.",
+                    "displayname": "Change someone else's displayname.",
+                    "password": "Change someone else's password."
+                },
+                "view": {
+                    "account": {
+                        "username": "View someone else's username.",
+                        "permissions": "View someone else's permissions."
+                    }
+                },
+                "delete": "Delete someone else's account."
+            }
+        },
+        "api": {
+            "key": {
+                "generate": "Generate a new API key for themselves.",
+                "destroy": "Destroy their own API key.",
+                "view": "View their own API key."
+            }
+        }
+    }));
+});
+
+
+/* PRIVATE APIs */
+
 
 
 module.exports = router;

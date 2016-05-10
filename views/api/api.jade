@@ -17,3 +17,10 @@ block content
             p Your account does not currently have enough permissions to generate an API key.
     else
         p If you have an account with permission 'api.generate_key', sign in to your account to be able to generate a key.
+    h4 Public APIs
+    p 
+        a(href="/api/projects/all", class="hover-style") /api/projects/all
+        | - list all projects from the homepage
+    p
+        a(href="/api/users/permissions/all", class="hover-style") /api/users/permissions/all
+        | - list all permissions as a pretty tree

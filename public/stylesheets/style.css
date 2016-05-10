@@ -19,6 +19,10 @@ h1, h2, h3, h4, h5, h6, p { margin: 5px 10px; }
 /* Links in the no-style class will not have any decoration or color */
 a.no-style, a.no-style:visited, a.no-style:hover, a.no-style:active { color: inherit; text-decoration: none; }
 
+/* Links in the hover-style class will only have a hover effect but no other decoration or color */
+a.hover-style, a.hover-style:visited, a.hover-style:active { color: inherit; text-decoration: none; }
+a.hover-style:hover                                        { color: #5B8FC3; }
+
 /* The main div that holds all other elements */
 /* Will be centered horizontally for bigger widths */
 div.content {
