@@ -59,4 +59,36 @@ router.get('/destroy', function(req, res, next) {
     });
 });
 
+
+/* Public APIS */
+
+/* Get all projects that is listed on the
+** homepage. They are returns in a list of
+** objects in JSON. */
+router.get('/projects/all', function(req, res, next) {
+    postman.getProjects(function( projects ) {
+        var output = {
+            length: 0,
+            projects: []
+        };
+        if (projects) {
+            var host = req.protocol + '://' + req.headers.host;
+            var p;
+            for (var i in projects) {
+                p = projects[i];
+                output.projects.push({
+                    name:        p.name,
+                    description: p.descriotion,
+                    url:         p.href.startsWith('/') ? host + p.href : p.href,
+                    image_url: host + p.image,
+                });
+            }
+            output.length = output.projects.length;
+        }
+        res.setHeader('content-type', 'text/json');
+        res.send(JSON.stringify(output));
+    });
+});
+
+
 module.exports = router;

@@ -83,6 +83,8 @@ app.use(function(req, res, next) {
         }
     }
 
+    console.log(req);
+
     /* Instead of a 404 page we'll just send them to the home page and tell them to stop spying on our shit */
     res.redirect('/#stop_spying_on_my_shit');
 });

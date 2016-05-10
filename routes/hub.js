@@ -4,7 +4,7 @@ var router = express.Router();
 var fs = require('fs');
 
 var postman = require('../postman.js');
-var mime = require('mime-types')       // Mime-types is THE tool for mime types
+var mime = require('mime-types');       // Mime-types is THE tool for mime types
 
 
 /* The main page of the site */
@@ -149,17 +149,18 @@ router.get('/admin', function(req, res, next) {
             next();
         }
     });
-})
+});
 
 
-/* When something is administrated in /admin it gets sent here for server-side change */
+/* When something is administrated in /admin it
+** gets sent here for server-side change */
 router.post('/admin', function(req, res, next) {
     postman.validateSession(req, function( user ) {
         if (user && user.hasPermission('administration.panel.edit')) {
             var action = req.body.action;
+            var image = req.body.image;
             if (action) {
                 if (action == 'create') {
-                    var image = req.body.image;
                     if (user.hasPermission('administration.project.create')) {
                         if (req.body.name && req.body.description && req.body.href && image) {
                             var publicImagePath = '/ul/' + image.hash + '.' + (mime.extension(image.type) || '');
@@ -204,7 +205,11 @@ router.post('/admin', function(req, res, next) {
                             if (otherUser) {
                                 if (req.body.permissions) {
                                     // if (user.hasPermissions('user.others.edit.permissions')) {
+                                    if (req.body.permissions == 'null') {
+                                        otherUser.permissions = null;
+                                    } else {
                                         otherUser.permissions = req.body.permissions;
+                                    }
                                     // }
                                 }
                                 if (req.body.displayname) {
@@ -238,5 +243,10 @@ router.post('/admin', function(req, res, next) {
     });
 });
 
+
+/* Print the IP of the remote client. */
+router.get('/ip', function(req, res, next) {
+    res.send(req.connection.remoteAddress);
+});
 
 module.exports = router;
