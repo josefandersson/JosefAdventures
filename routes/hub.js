@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
 
 /* The social page contains links to all my social media */
 router.get('/social', function(req, res, next) {
-    res.render('hub/social', { title: 'Home of Josef - Social' });
+    res.render('hub/social', { title: 'Social - Home of Josef' });
 });
 
 
@@ -28,7 +28,7 @@ router.get('/social', function(req, res, next) {
 router.get('/login', function(req, res, next) {
     postman.validateSession(req, function( user ) {
         if (!user) {
-            res.render('hub/login/login', { title: 'Home of Josef - Login' });
+            res.render('hub/login/login', { title: 'Login - Home of Josef' });
         } else {
             res.redirect('/me');
         }
@@ -118,13 +118,118 @@ router.get('/me', function(req, res, next) {
         if (user) {
             postman.getKeyFor(user, function( api_key ) {
                 if (api_key) {
-                    res.render('hub/me', { user: user, api_key: api_key.substring(0, 5) ,title: 'Home of Josef - User Info' });
+                    if (!user.hasPermission('api.key.view')) {
+                        api_key = api_key.substring(0, 5) + '...';
+                    }
+                    res.render('hub/me', { user: user, api_key: api_key ,title: 'Home of Josef - User Info' });
                 } else {
                     res.render('hub/me', { user: user, title: 'Home of Josef - User Info'});
                 }
             });
         } else {
             res.redirect('/login');
+        }
+    });
+});
+
+
+/* When a user is changing their own settings
+** they send a POST request to '/me'. */
+router.post('/me', function(req, res, next) {
+    postman.validateSession(req, function( user ) {
+        if (user) {
+            var action = req.body.action;
+            if (action) {
+                var actions = ['username', 'password', 'displayname'];
+                if (actions.indexOf(action) > -1) {
+                    if (req.body[action]) {
+                        if (user.hasPermission('user.self.edit.' + action)) {
+                            if (action == 'username') user[action] = req.body[action].toLowerCase();
+                            else                      user[action] = req.body[action];
+                            user.save(function() {
+                                res.redirect('/me#changes_made');
+                            });
+                        } else {
+                            res.redirect('/me#missing_permissions');
+                        }
+                    } else {
+                        res.redirect('/me#missing_parameters');
+                    }
+                } else {
+                    res.redirect('/me#invalid_form');
+                }
+            } else {
+                res.redirect('/me#invalid_form');
+            }
+        } else {
+            res.redirect('/me');
+        }
+    });
+});
+
+
+/* View information about another user if the user
+** himself has got enough permissions. If not, he's
+** redirected to '/me'. */
+router.get('/user/:id', function(req, res, next) {
+    postman.validateSession(req, function( user ) {
+        if (user) {
+            var otherUserId = req.params.id;
+            if (otherUserId) {
+                postman.getUserById(otherUserId, function( otherUser ) {
+                    if (otherUser) {
+                        res.render('hub/user', { user: user, otherUser: otherUser });
+                    } else {
+                        res.redirect('/me#unknown_user_id');
+                    }
+                });
+            } else {
+                res.redirect('/me#missing_user_id');
+            }
+        } else {
+            res.redirect('/me#need_login');
+        }
+    });
+});
+
+
+router.post('/user/:id', function(req, res, next) {
+    postman.validateSession(req, function( user ) {
+        if (user) {
+            var action = req.body.action;
+            if (action) {
+                var actions = ['displayname', 'username', 'password'];
+                if (actions.indexOf(action) > -1) {
+                    var otherUserId = req.params.id;
+                    if (req.body[action]) {
+                        if (otherUserId) {
+                            postman.getUserById(otherUserId, function( otherUser ) {
+                                if (otherUser) {
+                                    if (user.hasPermission('user.other.edit.' + action)) {
+                                        if (action == 'username') otherUser[action] = req.body[action].toLowerCase();
+                                        else                      otherUser[action] = req.body[action];
+                                        otherUser.save(function() {
+                                            res.redirect(req.path + '#changes_made');
+                                        });
+                                    } else {
+                                        res.redirect(req.path + '#missing_permissions');
+                                    }
+                                }
+                            });
+                        } else {
+
+                        }
+                    } else {
+                        res.redirect(req.path + '#missing_parameters');
+                    }
+                } else {
+                    res.redirect(req.path + '#invalid_form');
+                }
+            } else {
+                res.redirect(req.path + '#invalid_form');
+            }
+        } else {
+            res.redirect('/me');
         }
     });
 });

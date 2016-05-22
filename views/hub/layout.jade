@@ -6,6 +6,7 @@ html
         else 
             title Home of Josef
         meta(name='viewport', content='width=device-width, initial-scale=1')
+        script(src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js")
         link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Courgette|Rancho|Roboto+Condensed')
         link(rel='stylesheet', href='/stylesheets/style.css')
     body
@@ -16,5 +17,61 @@ html
                     h5 The adventurous webzone
             section
                 block content
+                a#user_button.user(href="/me")
+                    img.user(src="/images/account.png", title="Manage your account")
+                div#popup
+                    div.popup_window
+                        a.close(href="javascript:void(0)")
+                            img.close(src="/images/close.png", title="Close")
+                        div.popup_content#user_information(hidden)
+                            h2 Your account
+                            p 
+                                | Your displayname is: 
+                                span#info_displayname
+                            p 
+                                | Your username is: 
+                                span#info_username
+                            p
+                                | Your permissions (raw): 
+                                span#info_permissions
+                            p
+                                | Your api key: 
+                                span#info_api_key
+                            p
+                                a(href="/logout")
+                                    span Logout
+                        
+                        div.popup_content#register_popup(hidden)
+                            h2 Register!
+                            form(method="POST", action="/register")
+                                p
+                                    label(for="username") Username: 
+                                    input#username(name="username", placeholder="username")
+                                p
+                                    label(for="password") Password: 
+                                    input#password(name="password", type="password", placeholder="password")
+                                p
+                                    input(type="submit", value="Register")
+                            p
+                                a(href="/login")
+                                    span I do already have an account!
+
+                        
+                        div.popup_content#login_popup(hidden)
+                            h2 Login!
+                            form#login_form(method="POST", action="/login")
+                                p
+                                    label(for="username") Username: 
+                                    input#username(name="username", placeholder="username")
+                                p
+                                    label(for="password") Password: 
+                                    input#password(name="password", type="password", placeholder="password")
+                                p
+                                    input(type="submit", value="Login")
+                            p
+                                a(href="/register")
+                                    span I do not have an account!
+                                    
         footer
             span josefadventures.org &copy; 2016
+        script(src="/javascripts/global.js")

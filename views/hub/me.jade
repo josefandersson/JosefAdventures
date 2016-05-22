@@ -6,16 +6,24 @@ block content
     p Your username is: #{user.username}
     if user.permissions
         p Your permissions (raw): #{user.permissions}
+        each action in ['displayname', 'username', 'password']
+            if user.hasPermission('user.self.edit.' + action)
+                form(action="/me", method="POST")
+                    input(type="hidden", name="action", value="#{action}")
+                    p
+                        label(for="change_#{action}") Change #{action}: 
+                        input(id="change_#{action}", name="#{action}", type="#{action}", displayname="#{action}")
+                        input(type="submit", value="Change")
+        if user.hasPermission('administration.panel.view')
+            p
+                a(href="/admin")
+                    span Admin panel
     else
         p You have no elevated permissions
     if api_key
-        p You have an API key starting with: #{api_key}...
+        p You have an API key: #{api_key}
     else
         p You have no valid API keys
-    if user.hasPermission('administration.panel.view')
-        p
-            a(href="/admin")
-                span Admin panel
     p
         a(href="/api")
             span Check out the API

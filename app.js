@@ -7,7 +7,8 @@ var bodyParser = require('body-parser');
 var session = require('express-session');           // We need sessions for login management
 var MongoStore = require('connect-mongo')(session); // MongoStore is used for the session manager to be able to save data in mongodb instead of sqlite3
 
-var formidable = require('express-formidable'); // For parsing multipart forms
+// var formidable = require('express-formidable'); // For parsing multipart forms
+var formparse = require('./express-formparse'); // For parsing multipart forms
 
 var fs = require('fs');
 
@@ -40,12 +41,16 @@ app.use(session({
 }));
 
 // All uploaded files goes to ./tmp_upload before they are processed
-app.use(formidable.parse({
+app.use(formparse.parse({
     encoding: 'utf8',
     uploadDir: './tmp_upload',
     keepExtensions: true,
     hash: 'md5',
-    multiples: false
+    multiples: true,
+    matching: [
+        '/b/upload',
+        '/admin',
+    ],
 }));
 
 
@@ -60,7 +65,7 @@ app.use('/api/', api);
 /* The 'b' is our image board
 ** application for hosting random
 ** images, files and webms. */
-// app.use('/b/', random);
+app.use('/b/', random);
 
 /* All requests to the main page
 ** go through our custom middleware
@@ -68,20 +73,49 @@ app.use('/api/', api);
 app.use('/', hub);
 
 
-
-// catch 404 and forward to error handler
+/* To prevent or harddrive and tmp_upload folder filling
+** up we remove all uploaded files here. */
 app.use(function(req, res, next) {
-    /* If any images has been uploaded, we want to remove them from our system */
+    // Remove files.
     if (req.body) {
-        var variable;
-        for (var i in req.body) {
-            variable = req.body[i];
-            if (variable.path) {
-                console.log('Removing a uploaded file that has not been processed.');
-                fs.unlink(variable.path);
+        // There might be files.
+        if (req.body.file) {
+            // There were file(s).
+            if (req.body.file.path) {
+                // There is only one file.
+                fs.unlink(req.body.file.path);
+            } else {
+                // There are multiple files.
+                var file, counter;
+                for (var i in req.body.file) {
+                    file = req.body.file[i];
+                    if (file.path) {
+                        counter++;
+                        fs.unlink(file.path);
+                    }
+                }
+                console.log('Removed a total of %s files that had been uploaded.', counter);
             }
         }
     }
+
+    // If 'req.stop' is true, we will not go on to the next middleware. (using 'next()')
+    if (req.stop === true) {
+        // We'll stop right here!
+    } else {
+        // Go on to 404.
+        next();
+    }
+});
+
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+
+    /* In the future, maybe we can use subdomains for different projects
+    ** instead of different base routes. It would be much cooler, but may
+    ** require us to do some express haxing... :/ */
+    // console.log(req.headers.host); // <-- with this, we can see the domain and subdomain
 
     /* Instead of a 404 page we'll just send them to the home page and tell them to stop spying on our shit */
     res.redirect('/#stop_spying_on_my_shit');

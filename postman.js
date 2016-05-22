@@ -1,10 +1,16 @@
 /* This file is dedicated to talking with the database */
 /* Right now we use MongoDB (because it is great!) */
+/* This file will also contain for all methods */
 
 var mongoose = require('mongoose');    // Mongoose is an ORM for talking with MongoDB
 var Schema = mongoose.Schema;          // The schema is used for modelling schemas in the database
 var forge = require('node-forge');     // Forge does digest hashing
 var crypto = require('crypto');
+var mime = require('mime-types');      // Mime-types is THE tool for mime types
+
+var easyimg = require('easyimage');    // We use easyimage to create resized previews of images
+
+// var webp = require('webp-converter');    // We convert uploaded images to webp format because it is compact
 
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/josefadventures');
@@ -27,13 +33,50 @@ var randomSchema = new Schema({
     name:        { type: String },
     description: { type: String },
     hash:        { type: String },
-    upload:      { type: Date, default: Date.now },
+    upload_time: { type: Date, default: Date.now },
     uploader:    { type: Schema.Types.ObjectId, ref: 'user' },
-    attached: {
-        extension: { type: String },
-        filetype:  { type: String },
-        file:      { data: Buffer, contentType: String }
-    }
+    visibility: {
+        level:    { type: Number, default: 0 }, // Who can view it (0-3), normals, logged in users, uploader or administrators
+        unlisted: { type: Boolean, default: false }, // Only visible to people with the link
+    },
+    extension:   { type: String },
+    filetype:    { type: String },
+    file:        { data: Buffer, contentType: String },
+    preview:     { data: Buffer, contentType: String }, // A maximum 200x200 preview of the file (if the file is an image)
+});
+
+randomSchema.virtual('canBeViewedBy').get(function() {
+    return function(user) {
+        if (user) {
+            if (!user.hasPermission('random.view.all')) {
+                if (this.visibility.level != 3) {
+                    if (this.visibility.level != 2) {
+                        if (this.visibility.level != 1) {
+                            return true; // The image can be viewed by scrubs
+                        } else {
+                            if (user.hasPermission('random.view.restricted')) {
+                                return true; // The user is allowed to view restricted images
+                            } else {
+                                return false; // The user does not have permissions to view restricted images
+                            }
+                        }
+                    } else {
+                        if (this.uploader._id == user._id) {
+                            return true; // The user is the uploader and is allowed to view it
+                        } else {
+                            return false; // Only the uploader can view this image
+                        }
+                    }
+                } else {
+                    return false; // Only admins can view this file
+                }
+            } else {
+                return true; // The user is allowed to view all images on the site
+            }
+        } else {
+            return false;
+        }
+    };
 });
 
 // Schema for storing a random files' tags
@@ -58,38 +101,6 @@ var userSchema = new Schema({
     permissions: { type: String, default: null },
 });
 
-/*
-Permissions tree:
-
-administration:
-    panel:
-        view - view settings in the panel
-        edit - edit settings in the panel
-    project:
-        create - create a project on the home page
-        remove - remove a project from the home page
-        edit - edit a project on the home page
-user:
-    self:
-        edit:
-            username - change their own username
-            displayname - change their own username
-            password - change their own password
-        delete - remove their own account
-    others:
-        view_information - the others information (displayname, username)
-        edit:
-            username - change others usernames
-            displayname - change others displaynames
-            password - change others password
-        delete - remove others accounts
-random_files:
-    upload - upload a file to /b/
-    edit - edit a files information on /b/ (tags, description, name)
-    remove - remove a file from /b/
-api:
-    generate_key - is the user allowed to generate a key
-*/
 
 /* Takes unsaltedPassword and hashes it with the user's
 ** salt to see if it is the correct password. Returns
@@ -140,7 +151,6 @@ userSchema.virtual('hasPermission').get(function() {
 
                     }
                 }
-
 
                 // If there were no anti_permissions for the permission we will see if there are any permissions for the permission
                 if (noAntiPerm) {
@@ -211,10 +221,6 @@ var User            = mongoose.model('user',         userSchema);
 var Session         = mongoose.model('user_session', sessionSchema);
 var ApiKey          = mongoose.model('api_key',      apiKeySchema);
 
-/* Insert project (don't do it here...) */
-// new Project({ name: 'Social', description: 'Here you can find links to my social pages.', href: '/social/', image: '/images/social.png' }).save();
-// new Project({ name: 'KissMAL', description: 'A greasemonkey/tampermonkey userscript for myanimelist.net.', href: 'https://greasyfork.org/sv/scripts/15747-kissmal', image: '/images/kissmal.png' }).save();
-
 
 /* The postman object will be
 ** exported and will contain all
@@ -233,6 +239,7 @@ Postman.models = {
     tag:             Tag,
     user:            User,
     session:         Session,
+    apiKey:          ApiKey,
 };
 
 /*  Passes a list of mongodb objects
@@ -640,5 +647,146 @@ Postman.getUsers = function(cb) {
             }
         });
 };
+
+
+/* Get a 'random' object from the database
+** with the object ID and pass it to
+** callback.  */
+Postman.getRandomById = function(id, cb) {
+    Random.findOne({ _id: id }).populate('uploader').exec(function(err, doc) {
+        if (!err) {
+            if (doc) {
+                cb(doc);
+            } else {
+                cb(null);
+            }
+        } else {
+            cb(false);
+        }
+    });
+};
+
+
+/* Get a 'random' object from the database
+** with the hash and pass it to callback. */
+Postman.getRandomByHash = function(hash, cb) {
+        Random.findOne({ hash: hash }).populate('uploader').exec(function(err, doc) {
+            if (!err) {
+                if (doc) {
+                    cb(doc);
+                } else {
+                    cb(null);
+                }
+            } else {
+                cb(false);
+            }
+        });
+};
+
+
+/* Upload a 'random' file to the database.
+** If the user lack permissions, return false,
+** else return the 'random' object. Data can have
+** visibility, file, name, description, unlisted
+** and restricted  */
+Postman.uploadRandom = function(user, data, cb) {
+    if (user && data) {
+        if (data.file && data.visibility == 'public' || data.visibilty == 'private') {
+            if (user.hasPermission('random.upload.' + data.visibility)) {
+                var settings = {};
+                settings.name        = user.hasPermission('random.upload.name')        ? data.name        : undefined;
+                settings.description = user.hasPermission('random.upload.description') ? data.description : undefined;
+                settings.hash        = data.file.hash;
+                settings.uploader    = user;
+
+                var canDo = true;
+
+                if (data.visiblity == 'private') { settings.hidden = 4; }
+                else {
+                    settings.hidden = 0;
+                    if (data.unlisted)   {
+                        if (user.hasPermission('random.upload.unlisted')) {
+                            settings.hidden += 1;
+                        } else {
+                            canDo = false;
+                            cb({ success: false, error: 1, missing: 'random.upload.unlisted' });
+                        }
+                    }
+                    if (data.restricted && canDo) {
+                        if (user.hasPermission('random.upload.restricted')) {
+                            settings.hidden += 2;
+                        } else {
+                            canDo = false;
+                            cb({ success: false, error: 1, missing: 'random.upload.restricted' });
+                        }
+                    }
+                }
+
+                if (canDo) {
+                    // Create the random object
+                    var random = new Random(settings);
+
+                    // Read the uploaded file and insert it into the random object.
+                    random.extension        = mime.extension(data.file.type);
+                    random.file.contentType = data.file.type;
+                    random.file.data        = fs.readFileSync(data.file.path);
+
+                    // If the file is an image we want to create a preview for it.
+                    if (/image\/*/.test(data.file.type)) {
+                        console.log('Its an image!');
+
+                        // We need to get the width and height of the image to create a preview.
+                        easyimg.info(data.file.path).then(function( imageInfo ) {
+                            var w, h;
+                            if (imageInfo.width > imageInfo.height) {
+                                w = 200;
+                                h = imageInfo.height / (imageInfo.width / 200);
+                            } else {
+                                h = 200;
+                                w = imageInfo.width / (imageInfo.height / 200);
+                            }
+                            console.log('Making resize to ', h, w);
+
+                            // Make the resized preview.
+                            easyimg.resize({
+                                src: data.file.path, dst: data.file.path + '_prev',
+                                width: w, height: h
+                            }).then(function( image ) {
+                                console.log('hhmmmm');
+
+                                // Put the resized preview into the random object.
+                                random.preview.data        = fs.readFileSync(data.file.path + '_prev');
+                                random.preview.contentType = data.file.type;
+
+                                // Remove the preview image from disk.
+                                fs.unlink(data.file.path + '_prev');
+
+                                // Save the random object to the database and pass it to callback.
+                                random.save(function() { cb({ success: true, object: random }); });
+                            });
+                        }, function(err) {
+                            console.log('shiiieet');
+                            console.log(err);
+                            cb({ success: false, error: 1, missing: 'keepi' });
+                        });
+                    } else {
+                        // Since we do not have to create a preview image we'll save the random object to the database and pass it to callback.
+                        random.save(function() { cb({ success: true, object: random }); });
+                    }
+                } else {
+                    console.log('no permi');
+                    cb({ success: false, error: 1, missing: 'keepi' });
+                }
+            } else {
+                cb({ success: false, error: 1, missing: 'random.upload.' + data.visibility }); // No permission
+            }
+        } else {
+            cb({ success: false, error: 0, missing: 'parameters' }); // Missing parameters
+        }
+    } else {
+        cb({ success: false, error: 0, missing: 'user_or_data' }); // Missing user or data, this should not happen
+    }
+};
+
 
 module.exports = Postman;

@@ -1,0 +1,17 @@
+extends ../hub/layout
+
+block content
+    if random.name
+        h2= random.name
+    else
+        h2 #{random.hash}.#{random.extension}
+    img(src="/b/view/raw/#{random.hash}")
+    if random.description
+        p Description: #{random.description}
+    p Extension: #{random.extension}
+    p Content type: #{random.file.contentType}
+    p Upload time: #{random.upload_time}
+    p 
+        | Uploader: 
+        a(href="/user/#{random.uploader.id}") #{random.uploader.displayname}
+    p Visiblity: #{random.visibility}
