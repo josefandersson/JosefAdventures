@@ -8,7 +8,7 @@ var session = require('express-session');           // We need sessions for logi
 var MongoStore = require('connect-mongo')(session); // MongoStore is used for the session manager to be able to save data in mongodb instead of sqlite3
 
 // var formidable = require('express-formidable'); // For parsing multipart forms
-var formparse = require('./express-formparse'); // For parsing multipart forms
+var formparse = require('express-formparse'); // For parsing multipart forms
 
 var fs = require('fs');
 

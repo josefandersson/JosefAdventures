@@ -2,13 +2,19 @@ extends ../hub/layout
 
 block content
     h4 Uploaded files
-    each random in randoms
-        div.random
-            a(href="/b/view/#{random.hash}")
-                img(src="/b/view/preview/#{random.hash}/")
-            if random.name
-                p= random.name
-            else
-                p #{random.hash.length > 16 ? random.hash.substring(0, 14) + '...' : random.hash}.#{random.extension}
-            if random.description
-                p= random.description
+    button.toggle#toggle-preview-image Toggle image preview
+    button.toggle#toggle-preview-title Toggle title
+    button.toggle#toggle-preview-description Toggle description
+    ul.preview-list
+        each random in randoms
+            li.preview-item
+                div.preview
+                    a(href="/b/view/#{random.hash}")
+                        img.preview-image(src="/b/view/preview/#{random.hash}/")
+                        if random.name
+                            p.preview-title= random.name
+                        else
+                            p.preview-title #{random.hash.length > 16 ? random.hash.substring(0, 14) + '...' : random.hash}.#{random.extension}
+                        if random.description
+                            p.preview-description= random.description
+    script(src="/javascripts/browse.js")

@@ -52,7 +52,7 @@ router.get('/view/raw/:hash', function(req, res, next) {
                 res.send(random.file.data);
             };
 
-            if (random.visibility.level == 0) {
+            if (random.visibility.level === 0) {
                 // Can be viewed without login
                 displayFile();
             } else {
@@ -91,7 +91,7 @@ router.get('/view/preview/:hash', function(req, res, next) {
                 }
             };
 
-            if (random.visibility.level == 0) {
+            if (random.visibility.level === 0) {
                 // Can be viewed without login
                 displayFile();
             } else {
@@ -123,7 +123,6 @@ router.get('/view/:hash', function(req, res, next) {
     postman.getRandomByHash(req.params.hash, function( random ) {
         if (random) {
             // The random was found.
-            postman.get
             res.render('random/view', { random: random });
         } else {
             // The hash does not exist.

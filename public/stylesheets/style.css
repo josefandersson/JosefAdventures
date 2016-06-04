@@ -144,8 +144,9 @@ img#stop_spying_on_my_shit:target {
 
 
 /* The container for a random file on the /b/browse page. */
-div.random { padding: 10px 5px; }
-div.random > a > img { max-width: 200px; max-height: 200px; }
+ul.preview-list { list-style: none; }
+li.preview-item { padding: 10px 5px; display: inline-block; }
+div.preview > a > img { max-width: 200px; max-height: 200px; }
 
 
 
@@ -158,6 +159,12 @@ div.popup_content { color: #333; padding: 5px; }
 /* The 'X' at the top right of the popup window that is used to close the window. */
 img.close       { float: right; width: 24px; opacity: 0.3; margin: -5px; }
 img.close:hover { opacity: 0.6; }
+
+
+
+
+
+
 
 @media (min-width: 501px) and (max-width: 900px) {
     h1 { font-size: 35px; }
