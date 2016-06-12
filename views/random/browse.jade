@@ -2,9 +2,12 @@ extends ../hub/layout
 
 block content
     h4 Uploaded files
-    button.toggle#toggle-preview-image Toggle image preview
-    button.toggle#toggle-preview-title Toggle title
-    button.toggle#toggle-preview-description Toggle description
+    div.settings(style="display:none;")
+        p
+            button.toggle#toggle-preview-image Toggle image preview
+            button.toggle#toggle-preview-title Toggle title
+            button.toggle#toggle-preview-description Toggle description
+    button.toggle#toggle-settings Settings
     ul.preview-list
         each random in randoms
             li.preview-item

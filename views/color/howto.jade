@@ -1,0 +1,36 @@
+doctype html
+html
+    head
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(href='https://fonts.googleapis.com/css?family=Oswald:300|Alegreya+Sans:100' rel='stylesheet' type='text/css')
+        link(rel="stylesheet", href="/stylesheets/color.css")
+    body
+        div.content
+            h1(style="color:#{title_color}") /color
+            div.tab
+                h3 Why?
+                div.tab
+                    p Useful when you need a filled color background behind another application window. For example a completely black background when playing Runescape on one monitor and watching a movie on the other.
+                h3 When?
+                div.tab
+                    p 24 hours a day, 365 days a year.
+                h3 How?
+                div.tab
+                    p To display a color, simply go to /color/&lt;css color&gt; or /color/hex/&lt;hex color&gt; or /color/rgb/&lt;red&gt;,&lt;green&gt;,&lt;blue&gt;. When the page is loaded you will be able to enter fullscreen by clicking on the page. (..or by using shortcut <b>F11</b> in some browsers.)
+                    h5 Examples:
+                    div.tab
+                        p
+                            | English - 
+                            span(style='color:brown;')
+                                a(href='/color/brown') /color/brown
+                        p
+                            | Hexidecimal - 
+                            span(style='color:#af3d8e;')
+                                a(href='/color/hex/af3d8e') /color/hex/af3d8e
+                        p
+                            | RGB - 
+                            span(style='color:rgb(107,213,156);')
+                                a(href='/color/rgb/107,213,156') /color/rgb/107,213,156
+                            |  or 
+                            span(style='color:rgb(107,213,156);')
+                                a(href='/color/rgb/107/213/156') /color/rgb/107/213/156

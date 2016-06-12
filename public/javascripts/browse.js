@@ -3,13 +3,15 @@ $('#toggle-preview-image').click((e) =>       { toggleVisibleByClassName('previe
 $('#toggle-preview-title').click((e) =>       { toggleVisibleByClassName('preview-title');       });
 $('#toggle-preview-description').click((e) => { toggleVisibleByClassName('preview-description'); });
 
+$('#toggle-settings').click((e) => { toggleVisibleByClassName('settings', 'slow'); })
+
 // Toggle the visibility of elements with the specified class name.
-function toggleVisibleByClassName(className) {
+function toggleVisibleByClassName(className, speed) {
     var preview_elements = $(`.${className}`);
     if (!preview_elements.is(':visible')) {
-        preview_elements.show();
+        preview_elements.show(speed);
     } else {
-        preview_elements.hide();
+        preview_elements.hide(speed);
     }
 }
 

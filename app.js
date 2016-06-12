@@ -16,6 +16,8 @@ var api = require('./routes/api');
 var hub = require('./routes/hub');
 var random = require('./routes/random');
 
+var color = require('./routes/color');
+
 var app = express();
 
 app.set('views', path.join(__dirname, 'views'));
@@ -53,6 +55,11 @@ app.use(formparse.parse({
     ],
 }));
 
+
+/* The color page will display
+** the wanted color in full screen.
+** The color will be /color/<css color>. */
+app.use('/color', color);
 
 /* The api is both private and
 ** public. All requests require

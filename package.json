@@ -23,6 +23,7 @@
     "morgan": "~1.6.1",
     "multer": "^1.1.0",
     "node-forge": "^0.6.39",
+    "randomcolor": "^0.4.4",
     "serve-favicon": "~2.3.0",
     "webp-converter": "^2.0.2"
   }

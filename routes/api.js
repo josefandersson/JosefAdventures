@@ -285,6 +285,13 @@ router.get('/auth/logout', function(req, res, next) {
 });
 
 
+/* Upload random files to the website. */
+router.get('/b/upload', function(req, res, next) {
+    postman.validateSession(req, function( user ) {
+        res.setHeader('content-type', 'text/json');
+    });
+});
+
 /* PRIVATE APIs (api-key required) */
 
 module.exports = router;
